@@ -1,11 +1,12 @@
-from rest_framework import viewsets
-from .models import Category
-from .serializers import CategorySerializer
+from rest_framework import viewsets, generics, permissions
+from .models import Category, Publication
+from .serializers import CategorySerializer, PublicationSerializer
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from .permissions import IsOwnerOrReadOnly
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -26,3 +27,11 @@ def register(request):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }, status=status.HTTP_201_CREATED)
+
+class PublicationViewSet(viewsets.ModelViewSet):
+    queryset = Publication.objects.all()
+    serializer_class = PublicationSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
