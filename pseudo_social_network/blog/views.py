@@ -1,4 +1,4 @@
-from rest_framework import viewsets, generics, permissions
+from rest_framework import viewsets, generics, permissions, filters
 from .models import Category, Publication
 from .serializers import CategorySerializer, PublicationSerializer
 from django.contrib.auth.models import User
@@ -7,6 +7,8 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsOwnerOrReadOnly
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import PublicationFilter
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -32,6 +34,9 @@ class PublicationViewSet(viewsets.ModelViewSet):
     queryset = Publication.objects.all()
     serializer_class = PublicationSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_class = PublicationFilter
+    search_fields = ['title', 'content']
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

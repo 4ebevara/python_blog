@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'djoser',
     'blog',
     'drf_yasg',
+    'django_filters',
     
 )
 
